@@ -118,7 +118,7 @@ if "book added" not in st.session_state:
 if "book removed" not in st.session_state:
     st.session_state.book_removed = False
 
-if "currrent_view" not in st.session_state:
+if "current_view" not in st.session_state:
     st.session_state.current_view = 'library'
 
 # Load library from file
@@ -223,31 +223,28 @@ def get_library_stats():
         'authors': authors,
         'decades': decades
     }
+
+# Visualizations
 def create_visualizations(stats):
     if stats['total_books'] > 0:
-        # Read vs Unread Pie Chart
         fig_read_status = go.Figure(data=[go.Pie(
             labels=['Read', 'Unread'],
             values=[stats['read_books'], stats['total_books'] - stats["read_books"]],
             hole=.4,
             marker_colors=['#10B981', '#F87171']
         )])
-
         fig_read_status.update_layout(
             title_text="Read vs Unread Books",
             showlegend=True,
             height=400
         )
-
         st.plotly_chart(fig_read_status, use_container_width=True)
 
-    # Bar chart: Genres
     if stats['genres']:
         genres_df = pd.DataFrame({
             'Genre': list(stats['genres'].keys()),
             'Count': list(stats['genres'].values())    
         })
-
         fig_genres = px.bar(
             genres_df,
             x='Genre',
@@ -255,23 +252,19 @@ def create_visualizations(stats):
             color='Count',
             color_continuous_scale=px.colors.sequential.Blues
         )
-
         fig_genres.update_layout(
             title_text='Books by Genre',
             xaxis_title='Genre',
             yaxis_title='Number of Books',
             height=400
         )
-
         st.plotly_chart(fig_genres, use_container_width=True)
 
-    # Line chart: Decades
     if stats['decades']:
         decades_df = pd.DataFrame({
             'Decades': [f"{decade}s" for decade in stats['decades'].keys()],
             'Count': list(stats['decades'].values())
         })
-
         fig_decades = px.line(
             decades_df,
             x='Decades',
@@ -279,29 +272,33 @@ def create_visualizations(stats):
             markers=True,
             line_shape="spline"
         )
-
         fig_decades.update_layout(
             title_text='Books by Publication Decade',
             xaxis_title='Decade',
             yaxis_title='Number of Books',
             height=400
         )
-
         st.plotly_chart(fig_decades, use_container_width=True)
 
+# ---- MAIN APP STARTS HERE ----
 
-    #load library
-    load_library()
-    st.sidebar.markdown("<h1 style='text-align:center;'> Navigation</h1>" ,unsafe_allow_html=True)
-    lottie_book= load_lottieurl("https://assests9.lottieflies.com/temp/1f20_aKAfIn.json")
-    if lottie_book:
-        with st.sidebar:
-            st_lottie(lottie_book,height=200,key='book_animation')
-    nav_options = st.sidebar.radio(
+# Load library
+load_library()
+
+# Sidebar & Navigation
+st.sidebar.markdown("<h1 style='text-align:center;'> Navigation</h1>", unsafe_allow_html=True)
+lottie_book = load_lottieurl("https://assests9.lottieflies.com/temp/1f20_aKAfIn.json")
+if lottie_book:
+    with st.sidebar:
+        st_lottie(lottie_book, height=200, key='book_animation')
+
+# Navigation options
+nav_options = st.sidebar.radio(
     "Choose an option:",
     ["View Library", "Add Book", "Search Books", "Library Statistics"]
 )
 
+# Set current view
 if nav_options == "View Library":
     st.session_state.current_view = "library"
 elif nav_options == "Add Book":
@@ -312,12 +309,10 @@ elif nav_options == "Library Statistics":
     st.session_state.current_view = "stats"
     st.markdown("<h1 class='main-header'>Personal Library Manager</h1>", unsafe_allow_html=True)
 
-# Ensure 'current_view' exists in session_state
-if "current_view" not in st.session_state:
-    st.session_state.current_view = "library"
-
+# Render views
 if st.session_state.current_view == "add":
     st.markdown("<h2 class='sub-header'>Add a New Book</h2>", unsafe_allow_html=True)
+
 
 
 #adding books input form 
@@ -441,4 +436,3 @@ if st.session_state.current_view == "search":
                         st.markdown(f"**{author}**:{count}book{'s' if count >1 else ''}")
                         st.markdown("---")
                         st.markdown("copyright@2025 ayla rehman personal library manager", unsafe_allow_html=True)
-   
